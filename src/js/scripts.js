@@ -44,6 +44,9 @@ class BladeRunnerIntro {
   }
 
   init() {
+    //---------------------------------------------
+    //--------------------CREATE SCENE AND CAMERA
+
     this.camera = new THREE.PerspectiveCamera(
       100,
       window.innerWidth / window.innerHeight,
@@ -60,6 +63,17 @@ class BladeRunnerIntro {
     this.scene.background = new THREE.Color(0xffe9b3);
     // this.scene.fog = new THREE.FogExp2(0xffe9b3, 0.117);
     // this.scene.fog = new THREE.Fog(0xffe9b3, 10, 16);
+
+    this.geometry = new THREE.PlaneGeometry(
+      100,
+      100,
+      this.worldWidth - 1,
+      this.worldDepth - 1
+    );
+    this.geometry.rotateX(-Math.PI / 2);
+
+    //---------------------------------------------
+    //--------------------ADD LIGHTS
 
     this.lightBack.position.set(0, 6, 0);
     this.scene.add(this.lightBack);
@@ -107,15 +121,20 @@ class BladeRunnerIntro {
     for (let i = 0; i < this.introTexts.length; i++) {
       let element = document.createElement("div");
       element.style.color = "#000000";
+      element.classList.add("fadeOut");
       // element.width = window.innerWidth / 3 + "px";
       // element.height = "100px";
-      element.style.fontSize = '5rem';
+      element.style.position = "relative";
+      element.style.zIndex = i + 1; // stack Sentences on top of each other
+      element.style.fontSize = "5rem";
       element.innerHTML = this.introTexts[i];
+
       let sentence = new CSS2DObject(element);
       sentence.scale.set(1, 1, 1);
       sentence.visible = false;
       sentence.position.set(0, 5, -5);
       this.sentencesObjs.push(sentence);
+
       this.scene.add(sentence);
     }
 
@@ -125,16 +144,8 @@ class BladeRunnerIntro {
     this.labelRenderer.domElement.style.top = "0px";
     document.body.appendChild(this.labelRenderer.domElement);
 
-    this.geometry = new THREE.PlaneGeometry(
-      100,
-      100,
-      this.worldWidth - 1,
-      this.worldDepth - 1
-    );
-    this.geometry.rotateX(-Math.PI / 2);
-
     //---------------------------------------------
-    //--------------------CREATE ROAD
+    //--------------------CREATE SMOKE ROAD
 
     const texture = new THREE.TextureLoader().load("img/sand-texture.jpg");
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -153,6 +164,9 @@ class BladeRunnerIntro {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
+
+    //---------------------------------------------
+    //--------------------DEBUGGING
 
     this.controls = new FirstPersonControls(
       this.camera,
@@ -189,7 +203,7 @@ class BladeRunnerIntro {
         sentence.position.copy(this.camera.position);
         sentence.position.z -= 10;
         sentence.visible = true;
-        console.log(this.sentencesObjs);
+        // console.log(this.sentencesObjs);
       }
     }
   }
@@ -223,5 +237,4 @@ class BladeRunnerIntro {
   }
 }
 
-// Instantiate the WaterSimulation class to create the 3D scene
-const waterSim = new BladeRunnerIntro();
+new BladeRunnerIntro();
