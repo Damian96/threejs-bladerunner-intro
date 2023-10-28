@@ -58,8 +58,8 @@ body {
 #toggle-sound {
   position: fixed;
   z-index: 999999;
-  top: 2.5vw;
-  right: 10px;
+  top: 3vw;
+  right: 0;
   transform: translate(-50%, -50%);
 
   background-color: black;
@@ -69,6 +69,24 @@ body {
   justify-content: center;
   align-items: center;
   padding: 15px;
+
+  &.paused {
+    .play {
+      display: block;
+    }
+    .pause {
+      display: none;
+    }
+  }
+
+  &:not(.paused) {
+    .play {
+      display: none;
+    }
+    .pause {
+      display: block;
+    }
+  }
 }
 
 canvas,
@@ -84,7 +102,7 @@ canvas,
   opacity: 0;
   animation-name: fadeOut;
   animation-duration: 13s;
-  animation-timing-function: linear;
+  animation-timing-function: ease-out;
   animation-fill-mode: forwards;
 
   padding-left: clamp(25px, 100px, 10vw);

@@ -5,9 +5,6 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import "../sounds/intro-audio.mp3";
-import "../img/sand-texture.jpg";
-import "../img/smoke2.png";
 
 class BladeRunnerIntro {
   constructor() {
@@ -24,7 +21,6 @@ class BladeRunnerIntro {
     this.ambientLight = new THREE.AmbientLight(0xffffff, 4);
     this.lightFront = new THREE.SpotLight(0xffffff, 20, 10);
     this.lightBack = new THREE.PointLight(0xffffff, 0.5);
-    this.spotLightHelper = new THREE.SpotLightHelper(this.lightFront);
 
     this.introTexts = [
       `<p><span style="color:red;">Replicants</span> are bioengineered humans, Designed by tyrell corporation for use off-world.<br/> their enhanced strength made them ideal slave labor </p>`,
@@ -39,10 +35,11 @@ class BladeRunnerIntro {
     this.sentenceArr = [];
 
     this.cameraSpeed = 0.015;
-    this.worldWidth = 128;
-    this.worldDepth = 128;
+    this.worldWidth = 100;
+    this.worldDepth = 100;
     this.lastCameraPosZ = null;
     this.sound = null;
+    this.smokeParticles = [];
 
     this.init();
     this.animate();
@@ -71,8 +68,8 @@ class BladeRunnerIntro {
     this.scene.fog = new THREE.FogExp2(setColor, 0.117);
 
     this.geometry = new THREE.PlaneGeometry(
-      this.worldWidth * 2,
-      this.worldDepth * 2,
+      this.worldWidth * 1.5,
+      this.worldDepth * 1.5,
       this.worldWidth - 1,
       this.worldDepth - 1
     );
@@ -94,27 +91,31 @@ class BladeRunnerIntro {
     this.lightFront.shadow.camera.near = 1;
     this.lightFront.shadow.camera.far = 16;
     this.scene.add(this.lightFront);
-    // this.scene.add(this.spotLightHelper);
 
     //---------------------------------------------
     //--------------------ADD SMOKES
 
-    const smokeTexture = new THREE.TextureLoader().load("img/smoke2.png");
+    const smoke = new THREE.TextureLoader().load(
+      document.getElementById("smoke-texture").getAttribute("src")
+    );
     const smokeGeometry = new THREE.PlaneGeometry(10, 10);
     const smokeMaterial = new THREE.MeshLambertMaterial({
-      map: smokeTexture,
+      map: smoke,
       opacity: 0.6,
       emissive: 0xd6ccb2,
       transparent: true,
     });
 
-    this.smokeParticles = [];
-    for (let i = 0; i < 75; i++) {
+    for (
+      let i = this.camera.position.z;
+      i < this.worldDepth;
+      i += this.cameraSpeed*2
+    ) {
       let smokeElement = new THREE.Mesh(smokeGeometry, smokeMaterial);
       smokeElement.scale.set(2, 2, 2);
 
       // position smoke texures at random x,y,z positions
-      smokeElement.position.set(1, 5, Math.random() * 100 - 50);
+      smokeElement.position.set(1, 5, i);
       smokeElement.rotation.z = Math.random() * 10;
 
       this.scene.add(smokeElement);
@@ -169,19 +170,24 @@ class BladeRunnerIntro {
 
     // load a sound and set it as the Audio object's buffer
     const audioLoader = new THREE.AudioLoader();
-    audioLoader.load("sounds/intro-audio.mp3", function (buffer) {
-      sound.setBuffer(buffer);
-      sound.setLoop(false);
-      sound.setVolume(0.5);
-      // sound.play();
-    });
+    audioLoader.load(
+      document.getElementById("intro-audio").getAttribute("src"),
+      function (buffer) {
+        sound.setBuffer(buffer);
+        sound.setLoop(false);
+        sound.setVolume(0.5);
+        // sound.play();
+      }
+    );
 
     document
       .getElementById("toggle-sound")
       .addEventListener("click", function () {
         if (sound.isPlaying) {
+          this.classList.add("paused");
           sound.pause();
         } else {
+          this.classList.remove("paused");
           sound.play();
         }
       });
@@ -189,7 +195,9 @@ class BladeRunnerIntro {
     //---------------------------------------------
     //--------------------CREATE SMOKE ROAD
 
-    const texture = new THREE.TextureLoader().load("img/sand-texture.jpg");
+    const texture = new THREE.TextureLoader().load(
+      document.getElementById("sand-texture").getAttribute("src")
+    );
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(5, 5);
     texture.encoding = THREE.sRGBEncoding;
@@ -218,8 +226,8 @@ class BladeRunnerIntro {
     this.controls.movementSpeed = 100;
     this.controls.lookSpeed = 0.1;
 
-    this.stats = new Stats();
-    document.body.appendChild(this.stats.dom);
+    // this.stats = new Stats();
+    // document.body.appendChild(this.stats.dom);
 
     window.addEventListener("resize", this.onWindowResize.bind(this));
   }
@@ -268,7 +276,7 @@ class BladeRunnerIntro {
         showSentence.position.copy(this.camera.position);
         showSentence.position.z -= 10;
         showSentence.visible = true;
-        // console.log(this.sentenceArr);
+        console.log(this.sentenceArr);
       }
       this.lastCameraPosZ = this.camera.position.z;
     } else {
@@ -278,17 +286,12 @@ class BladeRunnerIntro {
     }
   }
 
-  moveSpotlight() {
-    // Update the position of the spotlight to follow the camera
-    this.spotlight.position.copy(this.camera.position);
-  }
-
   animate() {
     requestAnimationFrame(this.animate.bind(this));
 
     this.moveCamera();
     this.render();
-    this.stats.update();
+    // this.stats.update();
   }
 
   render() {
