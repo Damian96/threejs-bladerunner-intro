@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite src/",
-    "build": "vite build src/",
-    "preview": "vite preview src/"
+    "dev": "vite -c vite.config.js src/",
+    "build": "vite -c vite.config.js build src/",
+    "preview": "vite -c vite.config.js preview src/"
   },
   "keywords": [],
   "author": "",
