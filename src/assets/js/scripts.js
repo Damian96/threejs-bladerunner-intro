@@ -18,9 +18,6 @@ class BladeRunnerIntro {
     this.geometry = null;
     this.material = null;
     this.clock = new THREE.Clock();
-    this.ambientLight = new THREE.AmbientLight(0xffffff, 4);
-    this.lightFront = new THREE.SpotLight(0xffffff, 20, 10);
-    this.lightBack = new THREE.PointLight(0xffffff, 0.5);
 
     this.introTexts = [
       `<p><span style="color:red;">Replicants</span> are bioengineered humans, Designed by tyrell corporation for use off-world.<br/> their enhanced strength made them ideal slave labor </p>`,
@@ -29,7 +26,7 @@ class BladeRunnerIntro {
       `<p>wallace acquired the remains of tyrell corp and created a new line of replicants who obey</p>`,
       `<p>many older model replicants - nexus 8s with open-ended lifespans - survived.<br/> they are hunted down and 'retired'</p>`,
       `<p>those that hunt them still go by the name...<br/></p>`,
-      `<p style="text-align:center;"><strong>blade runners</strong></p>`,
+      `<p style="margin:auto; text-align:center;"><strong>blade runners</strong></p>`,
     ];
 
     this.sentenceArr = [];
@@ -56,7 +53,7 @@ class BladeRunnerIntro {
     this.scene = new THREE.Scene();
     const setColor = 0xbaa266; // 0xffe9b3
     this.scene.background = new THREE.Color(setColor);
-    this.scene.fog = new THREE.FogExp2(setColor, 0.117);
+    this.scene.fog = new THREE.FogExp2(setColor, 0.15);
     this.geometry = new THREE.PlaneGeometry(
       this.worldWidth,
       this.worldDepth,
