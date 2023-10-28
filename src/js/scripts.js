@@ -5,6 +5,9 @@ import {
   CSS2DObject,
   CSS2DRenderer,
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import "../sounds/intro-audio.mp3";
+import "../img/sand-texture.jpg";
+import "../img/smoke2.png";
 
 class BladeRunnerIntro {
   constructor() {
