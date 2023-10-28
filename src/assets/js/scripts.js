@@ -20,10 +20,10 @@ class BladeRunnerIntro {
     this.clock = new THREE.Clock();
 
     this.introTexts = [
-      `<p><span style="color:red;">Replicants</span> are bioengineered humans, Designed by tyrell corporation for use off-world.<br/> their enhanced strength made them ideal slave labor </p>`,
-      `<p>after a series of violent rebellions, <br/>their manufacturer became prohibited and <span style="color: blue;">tyrell corp went bankrupt</span></p>`,
-      `<p><span style="color: blue;">the collapse of ecosystems in the mid 2020s</span> led to the rise of industrialist niander wallace.<br/> whose mastery of synthtetic farming averted famine</p>`,
-      `<p>wallace acquired the remains of tyrell corp and created a new line of replicants who obey</p>`,
+      `<p><span style="color:red;">Replicants</span> are bioengineered humans, designed by Tyrell Corporatio for use off-world.<br/> their enhanced strength made them ideal slave labor </p>`,
+      `<p>after a series of violent rebellions, <br/>their manufacturing became prohibited and <span style="color: blue;">Tyrell Corp. went bankrupt</span></p>`,
+      `<p><span style="color: blue;">the collapse of ecosystems in the mid 2020s</span> led to the rise of industrialist Niander Wallace.<br/> whose mastery of synthtetic farming averted famine</p>`,
+      `<p>wallace acquired the remains of Tyrell Corp and created a new line of replicants who obey</p>`,
       `<p>many older model replicants - nexus 8s with open-ended lifespans - survived.<br/> they are hunted down and 'retired'</p>`,
       `<p>those that hunt them still go by the name...<br/></p>`,
       `<p style="margin:auto; text-align:center;"><strong>blade runners</strong></p>`,
