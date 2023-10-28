@@ -1,3 +1,52 @@
+// Lato
+
+@font-face {
+  font-family: "Lato-Black";
+  src: url("../fonts/Lato/Lato-Black.ttf");
+}
+
+@font-face {
+  font-family: "Lato-Bold";
+  src: url("../fonts/Lato/Lato-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Lato-Italic";
+  src: url("../fonts/Lato/Lato-Italic.ttf");
+}
+
+@font-face {
+  font-family: "Lato-Light";
+  src: url("../fonts/Lato/Lato-Light.ttf");
+}
+
+@font-face {
+  font-family: "Lato-Regular";
+  src: url("../fonts/Lato/Lato-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Lato-Thin";
+  src: url("../fonts/Lato/Lato-Regular.ttf");
+}
+
+$Lato: (
+  "black": "Lato-Black",
+  "bold": "Lato-Bold",
+  "italic": "Lato-Italic",
+  "light": "Lato-Light",
+  "regular": "Lato-Regular",
+  "thin": "Lato-Regular",
+);
+
+@each $variant, $font in $Lato {
+  .font-lato-#{$variant} {
+    font-family: #{$font}, "Lato", sans-serif;
+    font-weight: normal;
+    font-style: normal;
+  }
+}
+
 body {
   color: white;
   margin: 0;
@@ -5,14 +54,60 @@ body {
   background-color: black;
   cursor: crosshair;
 }
-canvas {
+
+#toggle-sound {
+  position: fixed;
+  z-index: 999999;
+  top: 2.5vw;
+  right: 10px;
+  transform: translate(-50%, -50%);
+
+  background-color: black;
+  color: white;
+  border-radius: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+
+canvas,
+.canvas {
   display: block;
   width: 100%;
   height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
 .fadeOut {
-  animation: fadeOut forwards 3s linear;
+  opacity: 0;
+  animation-name: fadeOut;
+  animation-duration: 13s;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+
+  padding-left: clamp(25px, 100px, 10vw);
+  padding-right: clamp(25px, 100px, 10vw);
+  text-align: left;
+  width: 75%;
+  margin: auto;
+  height: 100%;
+  position: relative;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-flow: column wrap;
+  font-size: clamp(25px, 35px, 3vw);
+
+  transition: opacity 0.3 ease-out;
+
+  @extend .font-lato-light;
+
+  span[style] {
+    @extend .font-lato-bold;
+  }
 }
 
 @keyframes fadeOut {

@@ -24,20 +24,22 @@ class BladeRunnerIntro {
     this.spotLightHelper = new THREE.SpotLightHelper(this.lightFront);
 
     this.introTexts = [
-      `<p><span style="color:red;">Replicants</span> are bioengineered humans, Designed by tyrell corporation for use off-world. their enhanced strength made them ideal slave labor </p>`,
-      `<p>after a series of violent rebellions, their manufacture became prohibited and <span style="color: blue;">tyrell corp went bankrupt</span></p>`,
-      `<p><span style="color: blue;">the collapse of ecosystems in the mid 2020s</span> led to the rise of industrialist niander wallace. whose mastery of synthtetic farming averted famine</p>`,
+      `<p><span style="color:red;">Replicants</span> are bioengineered humans, Designed by tyrell corporation for use off-world.<br/> their enhanced strength made them ideal slave labor </p>`,
+      `<p>after a series of violent rebellions, <br/>their manufacturer became prohibited and <span style="color: blue;">tyrell corp went bankrupt</span></p>`,
+      `<p><span style="color: blue;">the collapse of ecosystems in the mid 2020s</span> led to the rise of industrialist niander wallace.<br/> whose mastery of synthtetic farming averted famine</p>`,
       `<p>wallace acquired the remains of tyrell corp and created a new line of replicants who obey</p>`,
-      `<p>many older model replicants - nexus 8s with open-ended lifespans - survived. they are hunted down and 'retired'</p>`,
+      `<p>many older model replicants - nexus 8s with open-ended lifespans - survived.<br/> they are hunted down and 'retired'</p>`,
       `<p>those that hunt them still go by the name...<br/></p>`,
       `<p><span class="br">blade runner</span></p>`,
     ];
 
-    this.sentencesObjs = [];
+    this.sentenceArr = [];
 
-    this.cameraSpeed = 0.035;
+    this.cameraSpeed = 0.015;
     this.worldWidth = 128;
     this.worldDepth = 128;
+    this.lastCameraPosZ = null;
+    this.sound = null;
 
     this.init();
     this.animate();
@@ -54,19 +56,20 @@ class BladeRunnerIntro {
       20000
     );
     this.camera.position.y = 5;
-    this.camera.position.z = this.worldDepth / 4;
+    this.camera.position.z = this.cameraSpeed + 5;
+    this.lastCameraPosZ = this.camera.position.z;
 
     this.clock = new THREE.Clock();
 
     this.scene = new THREE.Scene();
     this.scene.add(this.ambientLight);
-    this.scene.background = new THREE.Color(0xffe9b3);
-    // this.scene.fog = new THREE.FogExp2(0xffe9b3, 0.117);
-    // this.scene.fog = new THREE.Fog(0xffe9b3, 10, 16);
+    const setColor = 0xbaa266; // 0xffe9b3
+    this.scene.background = new THREE.Color(setColor);
+    this.scene.fog = new THREE.FogExp2(setColor, 0.117);
 
     this.geometry = new THREE.PlaneGeometry(
-      100,
-      100,
+      this.worldWidth * 2,
+      this.worldDepth * 2,
       this.worldWidth - 1,
       this.worldDepth - 1
     );
@@ -111,7 +114,7 @@ class BladeRunnerIntro {
       smokeElement.position.set(1, 5, Math.random() * 100 - 50);
       smokeElement.rotation.z = Math.random() * 10;
 
-      // this.scene.add(smokeElement);
+      this.scene.add(smokeElement);
       this.smokeParticles.push(smokeElement);
     }
 
@@ -122,27 +125,63 @@ class BladeRunnerIntro {
       let element = document.createElement("div");
       element.style.color = "#000000";
       element.classList.add("fadeOut");
-      // element.width = window.innerWidth / 3 + "px";
-      // element.height = "100px";
-      element.style.position = "relative";
       element.style.zIndex = i + 1; // stack Sentences on top of each other
-      element.style.fontSize = "5rem";
       element.innerHTML = this.introTexts[i];
 
       let sentence = new CSS2DObject(element);
-      sentence.scale.set(1, 1, 1);
       sentence.visible = false;
+      sentence.scale.set(1, 1, 1);
       sentence.position.set(0, 5, -5);
-      this.sentencesObjs.push(sentence);
+      this.sentenceArr.push({
+        object: sentence,
+        showAt: Number.parseFloat(
+          ((this.worldDepth - this.camera.position.z) /
+            (this.introTexts.length + 1)) *
+            i
+        ),
+        shown: false,
+      });
 
       this.scene.add(sentence);
     }
+
+    // console.log(this.sentenceArr);
+    this.sentenceArr = this.sentenceArr.reverse();
 
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
     this.labelRenderer.domElement.style.position = "absolute";
     this.labelRenderer.domElement.style.top = "0px";
+    this.labelRenderer.domElement.style.left = "0px";
+    this.labelRenderer.domElement.classList.add("canvas");
     document.body.appendChild(this.labelRenderer.domElement);
+
+    //---------------------------------------------
+    //--------------------ADD INTRO MUSIC
+    const listener = new THREE.AudioListener();
+    this.camera.add(listener);
+
+    // create a global audio source
+    const sound = new THREE.Audio(listener);
+
+    // load a sound and set it as the Audio object's buffer
+    const audioLoader = new THREE.AudioLoader();
+    audioLoader.load("sounds/intro-audio.mp3", function (buffer) {
+      sound.setBuffer(buffer);
+      sound.setLoop(false);
+      sound.setVolume(0.5);
+      // sound.play();
+    });
+
+    document
+      .getElementById("toggle-sound")
+      .addEventListener("click", function () {
+        if (sound.isPlaying) {
+          sound.pause();
+        } else {
+          sound.play();
+        }
+      });
 
     //---------------------------------------------
     //--------------------CREATE SMOKE ROAD
@@ -191,20 +230,48 @@ class BladeRunnerIntro {
     this.controls.handleResize();
   }
 
+  /**
+   *
+   * @return Object|false
+   */
+  getSentenceAtPosZ(currentPosZ) {
+    const pos = Number.parseFloat(Math.abs(currentPosZ));
+    const prevPos = Number.parseFloat(this.lastCameraPosZ);
+    // console.log(pos, prevPos);
+    for (let i = 0; i < this.sentenceArr.length; i++) {
+      if (
+        this.sentenceArr[i].showAt >= prevPos &&
+        this.sentenceArr[i].showAt <= pos &&
+        !this.sentenceArr[i].shown
+      ) {
+        this.sentenceArr[i].shown = true;
+        return this.sentenceArr[i].object;
+      }
+    }
+    return false;
+  }
+
   moveCamera() {
     // const delta = this.clock.getDelta();
     // const time = this.clock.getElapsedTime() * 10;
 
     // Move the camera along a straight line
-    if (this.camera.position.z < this.worldDepth) {
+    if (Math.abs(this.camera.position.z) < this.worldDepth) {
+      // console.log("moving camera");
       this.camera.position.z -= this.cameraSpeed;
-      if (parseInt(this.camera.position.z) % this.sentencesObjs.length == 0) {
-        const sentence = this.sentencesObjs.shift();
-        sentence.position.copy(this.camera.position);
-        sentence.position.z -= 10;
-        sentence.visible = true;
-        // console.log(this.sentencesObjs);
+      const showSentence = this.getSentenceAtPosZ(this.camera.position.z);
+      // console.log(Math.abs(this.camera.position.z));
+      if (showSentence) {
+        showSentence.position.copy(this.camera.position);
+        showSentence.position.z -= 10;
+        showSentence.visible = true;
+        // console.log(this.sentenceArr);
       }
+      this.lastCameraPosZ = this.camera.position.z;
+    } else {
+      window.location.replace(
+        "https://github.com/Damian96/threejs-bladerunner-intro"
+      );
     }
   }
 
