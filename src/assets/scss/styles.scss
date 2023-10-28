@@ -101,7 +101,7 @@ canvas,
 .fadeOut {
   opacity: 1;
   animation-name: fadeOut;
-  animation-duration: 13s;
+  animation-duration: 11s;
   animation-timing-function: ease-out;
   animation-fill-mode: forwards;
 
@@ -114,9 +114,8 @@ canvas,
   position: relative;
   color: black;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
   flex-flow: column wrap;
+  justify-content: center;
   font-size: clamp(25px, 35px, 3vw);
 
   @extend .font-lato-light;

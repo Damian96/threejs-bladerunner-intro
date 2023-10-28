@@ -23,7 +23,7 @@ class BladeRunnerIntro {
       `<p><span style="color:red;">Replicants</span> are bioengineered humans, designed by Tyrell Corporatio for use off-world.<br/> their enhanced strength made them ideal slave labor </p>`,
       `<p>after a series of violent rebellions, <br/>their manufacturing became prohibited and <span style="color: blue;">Tyrell Corp. went bankrupt</span></p>`,
       `<p><span style="color: blue;">the collapse of ecosystems in the mid 2020s</span> led to the rise of industrialist Niander Wallace.<br/> whose mastery of synthtetic farming averted famine</p>`,
-      `<p>wallace acquired the remains of Tyrell Corp and created a new line of replicants who obey</p>`,
+      `<p>Wallace acquired the remains of Tyrell Corp and created a new line of replicants who obey</p>`,
       `<p>many older model replicants - nexus 8s with open-ended lifespans - survived.<br/> they are hunted down and 'retired'</p>`,
       `<p>those that hunt them still go by the name...<br/></p>`,
       `<p style="margin:auto; text-align:center;"><strong>blade runners</strong></p>`,
@@ -108,7 +108,7 @@ class BladeRunnerIntro {
       smokeElement.lookAt(endOfWorld);
 
       smokeElement.position.set(i, 5, 0);
-      // smokeElement.rotation.z = Math.random() * 10;
+      smokeElement.rotation.z = Math.random() * 10;
 
       this.scene.add(smokeElement);
       this.smokeParticles.push(smokeElement);
@@ -124,6 +124,14 @@ class BladeRunnerIntro {
       element.style.color = "#000000";
       element.classList.add("fadeOut");
       element.innerHTML = this.introTexts[i];
+
+      if (i == 0 || i == this.introTexts.length - 1) {
+        element.style.alignItems = "center";
+      } else if (i % 2 == 0) {
+        element.style.alignItems = "flex-end";
+      } else if (i % 2 == 1) {
+        element.style.alignItems = "flex-start";
+      }
 
       let sentence = new CSS2DObject(element);
       sentence.visible = false;
