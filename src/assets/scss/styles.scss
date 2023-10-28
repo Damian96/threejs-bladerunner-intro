@@ -99,7 +99,7 @@ canvas,
 }
 
 .fadeOut {
-  opacity: 0;
+  opacity: 1;
   animation-name: fadeOut;
   animation-duration: 13s;
   animation-timing-function: ease-out;
@@ -119,8 +119,6 @@ canvas,
   flex-flow: column wrap;
   font-size: clamp(25px, 35px, 3vw);
 
-  transition: opacity 0.3 ease-out;
-
   @extend .font-lato-light;
 
   span[style] {
@@ -135,6 +133,6 @@ canvas,
 
   100% {
     opacity: 0;
-    z-index: -1;
+    display: none;
   }
 }

@@ -17,7 +17,7 @@ class BladeRunnerIntro {
     this.mesh = null;
     this.geometry = null;
     this.material = null;
-    this.clock = null;
+    this.clock = new THREE.Clock();
     this.ambientLight = new THREE.AmbientLight(0xffffff, 4);
     this.lightFront = new THREE.SpotLight(0xffffff, 20, 10);
     this.lightBack = new THREE.PointLight(0xffffff, 0.5);
@@ -29,17 +29,18 @@ class BladeRunnerIntro {
       `<p>wallace acquired the remains of tyrell corp and created a new line of replicants who obey</p>`,
       `<p>many older model replicants - nexus 8s with open-ended lifespans - survived.<br/> they are hunted down and 'retired'</p>`,
       `<p>those that hunt them still go by the name...<br/></p>`,
-      `<p><span class="br">blade runner</span></p>`,
+      `<p style="text-align:center;"><strong>blade runners</strong></p>`,
     ];
 
     this.sentenceArr = [];
 
     this.cameraSpeed = 0.015;
-    this.worldWidth = 100;
+    this.worldWidth = 200;
     this.worldDepth = 100;
-    this.lastCameraPosZ = null;
+    this.lastCameraX = null;
     this.sound = null;
     this.smokeParticles = [];
+    this.sentenceInterval = null;
 
     this.init();
     this.animate();
@@ -49,48 +50,41 @@ class BladeRunnerIntro {
     //---------------------------------------------
     //--------------------CREATE SCENE AND CAMERA
 
+    const endOfWorld = new THREE.Vector3(this.worldWidth, 5, 0);
+    const startOfWorld = new THREE.Vector3(-this.worldDepth, 5, 0);
+
+    this.scene = new THREE.Scene();
+    const setColor = 0xbaa266; // 0xffe9b3
+    this.scene.background = new THREE.Color(setColor);
+    this.scene.fog = new THREE.FogExp2(setColor, 0.117);
+    this.geometry = new THREE.PlaneGeometry(
+      this.worldWidth,
+      this.worldDepth,
+      this.worldWidth - 1,
+      this.worldDepth - 1
+    );
+    this.geometry.rotateX(-Math.PI / 2);
+
     this.camera = new THREE.PerspectiveCamera(
       100,
       window.innerWidth / window.innerHeight,
       1,
       20000
     );
+    this.camera.position.x = startOfWorld.x;
     this.camera.position.y = 5;
-    this.camera.position.z = this.cameraSpeed + 5;
-    this.lastCameraPosZ = this.camera.position.z;
+    this.lastCameraX = this.camera.position.x;
+    this.camera.lookAt(endOfWorld);
 
-    this.clock = new THREE.Clock();
-
-    this.scene = new THREE.Scene();
-    this.scene.add(this.ambientLight);
-    const setColor = 0xbaa266; // 0xffe9b3
-    this.scene.background = new THREE.Color(setColor);
-    this.scene.fog = new THREE.FogExp2(setColor, 0.117);
-
-    this.geometry = new THREE.PlaneGeometry(
-      this.worldWidth * 1.5,
-      this.worldDepth * 1.5,
-      this.worldWidth - 1,
-      this.worldDepth - 1
-    );
-    this.geometry.rotateX(-Math.PI / 2);
-
-    //---------------------------------------------
-    //--------------------ADD LIGHTS
-
-    this.lightBack.position.set(0, 6, 0);
-    this.scene.add(this.lightBack);
-
-    this.lightFront.rotation.x = (45 * Math.PI) / 180;
-    this.lightFront.rotation.z = (-45 * Math.PI) / 180;
-    this.lightFront.position.set(5, 5, 5);
-    this.lightFront.castShadow = true;
-    this.lightFront.shadow.mapSize.width = 6000;
-    this.lightFront.shadow.mapSize.height =
-      this.lightFront.shadow.mapSize.width;
-    this.lightFront.shadow.camera.near = 1;
-    this.lightFront.shadow.camera.far = 16;
-    this.scene.add(this.lightFront);
+    // Debugging
+    // const forward = this.camera.getWorldDirection(new THREE.Vector3(0, 0, 0));
+    // const arrowHelper = new THREE.ArrowHelper(
+    //   forward,
+    //   this.camera.position,
+    //   10,
+    //   0xff0000
+    // );
+    // this.scene.add(arrowHelper);
 
     //---------------------------------------------
     //--------------------ADD SMOKES
@@ -101,26 +95,29 @@ class BladeRunnerIntro {
     const smokeGeometry = new THREE.PlaneGeometry(10, 10);
     const smokeMaterial = new THREE.MeshLambertMaterial({
       map: smoke,
-      opacity: 0.6,
+      opacity: 0.4,
       emissive: 0xd6ccb2,
       transparent: true,
+      side: THREE.BackSide,
     });
 
     for (
-      let i = this.camera.position.z;
-      i < this.worldDepth;
-      i += this.cameraSpeed*2
+      let i = startOfWorld.x;
+      i < endOfWorld.x;
+      i += this.cameraSpeed * 150
     ) {
       let smokeElement = new THREE.Mesh(smokeGeometry, smokeMaterial);
       smokeElement.scale.set(2, 2, 2);
+      smokeElement.lookAt(endOfWorld);
 
-      // position smoke texures at random x,y,z positions
-      smokeElement.position.set(1, 5, i);
-      smokeElement.rotation.z = Math.random() * 10;
+      smokeElement.position.set(i, 5, 0);
+      // smokeElement.rotation.z = Math.random() * 10;
 
       this.scene.add(smokeElement);
       this.smokeParticles.push(smokeElement);
     }
+
+    console.log(this.smokeParticles);
 
     //---------------------------------------------
     //--------------------ADD INTRO
@@ -129,28 +126,27 @@ class BladeRunnerIntro {
       let element = document.createElement("div");
       element.style.color = "#000000";
       element.classList.add("fadeOut");
-      element.style.zIndex = i + 1; // stack Sentences on top of each other
       element.innerHTML = this.introTexts[i];
 
       let sentence = new CSS2DObject(element);
       sentence.visible = false;
       sentence.scale.set(1, 1, 1);
-      sentence.position.set(0, 5, -5);
-      this.sentenceArr.push({
-        object: sentence,
-        showAt: Number.parseFloat(
-          ((this.worldDepth - this.camera.position.z) /
-            (this.introTexts.length + 1)) *
-            i
-        ),
-        shown: false,
-      });
-
+      this.sentenceArr.push(sentence);
       this.scene.add(sentence);
     }
 
     // console.log(this.sentenceArr);
-    this.sentenceArr = this.sentenceArr.reverse();
+    let sentence = this.sentenceArr.shift();
+    sentence.lookAt(this.camera.position);
+    sentence.visible = true;
+    this.sentenceInterval = setInterval(() => {
+      if (this.sentenceArr.length > 0) {
+        const sentence = this.sentenceArr.shift();
+        sentence.lookAt(this.camera.position);
+        sentence.visible = true;
+        // console.log(this.sentenceArr);
+      }
+    }, ((this.worldWidth - Math.abs(this.camera.position.x)) / this.introTexts.length) * 1000);
 
     this.labelRenderer = new CSS2DRenderer();
     this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -176,7 +172,6 @@ class BladeRunnerIntro {
         sound.setBuffer(buffer);
         sound.setLoop(false);
         sound.setVolume(0.5);
-        // sound.play();
       }
     );
 
@@ -193,7 +188,7 @@ class BladeRunnerIntro {
       });
 
     //---------------------------------------------
-    //--------------------CREATE SMOKE ROAD
+    //--------------------CREATE SAND ROAD
 
     const texture = new THREE.TextureLoader().load(
       document.getElementById("sand-texture").getAttribute("src")
@@ -241,48 +236,12 @@ class BladeRunnerIntro {
     this.controls.handleResize();
   }
 
-  /**
-   *
-   * @return Object|false
-   */
-  getSentenceAtPosZ(currentPosZ) {
-    const pos = Number.parseFloat(Math.abs(currentPosZ));
-    const prevPos = Number.parseFloat(this.lastCameraPosZ);
-    // console.log(pos, prevPos);
-    for (let i = 0; i < this.sentenceArr.length; i++) {
-      if (
-        this.sentenceArr[i].showAt >= prevPos &&
-        this.sentenceArr[i].showAt <= pos &&
-        !this.sentenceArr[i].shown
-      ) {
-        this.sentenceArr[i].shown = true;
-        return this.sentenceArr[i].object;
-      }
-    }
-    return false;
-  }
-
   moveCamera() {
-    // const delta = this.clock.getDelta();
-    // const time = this.clock.getElapsedTime() * 10;
-
-    // Move the camera along a straight line
-    if (Math.abs(this.camera.position.z) < this.worldDepth) {
-      // console.log("moving camera");
-      this.camera.position.z -= this.cameraSpeed;
-      const showSentence = this.getSentenceAtPosZ(this.camera.position.z);
-      // console.log(Math.abs(this.camera.position.z));
-      if (showSentence) {
-        showSentence.position.copy(this.camera.position);
-        showSentence.position.z -= 10;
-        showSentence.visible = true;
-        console.log(this.sentenceArr);
-      }
-      this.lastCameraPosZ = this.camera.position.z;
+    if (Math.abs(this.camera.position.x) < this.worldWidth) {
+      this.camera.position.x += this.cameraSpeed;
+      // console.log("moving camera")
     } else {
-      window.location.replace(
-        "https://github.com/Damian96/threejs-bladerunner-intro"
-      );
+      clearInterval(this.sentenceInterval);
     }
   }
 
@@ -310,4 +269,4 @@ class BladeRunnerIntro {
   }
 }
 
-new BladeRunnerIntro();
+console.log(new BladeRunnerIntro());
